@@ -16,7 +16,8 @@
 require_once("helpers.php");
 require_once("userInput.php");
 
-function checkMatch(stdClass $board, array $condition, $x, $y): bool {
+function checkMatch(stdClass $board, array $condition, $x, $y): bool
+{
     $matchSymbol = $board->content[$y][$x]->symbol;
     foreach ($condition as $position) {
         if (!isset($board->content[$y + $position[1]][$x + $position[0]]->symbol)) {
@@ -29,7 +30,8 @@ function checkMatch(stdClass $board, array $condition, $x, $y): bool {
     return true;
 }
 
-function createMatch(stdClass $element, array $condition, int $x, int $y) {
+function createMatch(stdClass $element, array $condition, int $x, int $y)
+{
     $match = new stdClass();
     $match->element = $element;
     $match->condition = $condition;
@@ -38,7 +40,8 @@ function createMatch(stdClass $element, array $condition, int $x, int $y) {
     return $match;
 }
 
-function findMatches(stdClass $board, array $winConditions) {
+function findMatches(stdClass $board, array $winConditions)
+{
     $matches = [];
     foreach ($winConditions as $condition) {
         foreach ($board->content as $y => $row) {
@@ -52,7 +55,8 @@ function findMatches(stdClass $board, array $winConditions) {
     return $matches;
 }
 
-function fillBoard(stdClass $board) {
+function fillBoard(stdClass $board)
+{
     for ($y = 0; $y < $board->height; $y++) {
         $board->content[$y] = [];
         for ($x = 0; $x < $board->width; $x++) {
@@ -62,7 +66,8 @@ function fillBoard(stdClass $board) {
 }
 
 
-function createElement($symbol, $weight, $value) {
+function createElement($symbol, $weight, $value)
+{
     $element = new stdClass();
     $element->symbol = $symbol;
     $element->weight = $weight;
@@ -93,8 +98,9 @@ function displayBoard(stdClass $board)
     }
 }
 
-function calculateMatchPayout($element, $condition, $ratio) {
-    return (int) $element->value * count($condition) * $ratio;
+function calculateMatchPayout($element, $condition, $ratio)
+{
+    return (int)$element->value * count($condition) * $ratio;
 }
 
 $properties = [
@@ -104,7 +110,7 @@ $properties = [
     "baseBet" => 5,
     "elements" => [
         createElement("/", 7, 1),
-        createElement("$", 1 , 5),
+        createElement("$", 1, 5),
         createElement("q", 3, 2),
         createElement("-", 4, 1)
     ]
@@ -120,7 +126,7 @@ $bet = min($bet, $money);
 
 while (true) {
     echo "You have $money coins.\n";
-    while(true) {
+    while (true) {
         echo "1) Play with a bet of $bet coins\n";
         echo "2) Change bet amount\n";
         $choice = getUserChoiceFromArray(["1", "2"], "choice");
