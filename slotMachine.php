@@ -1,5 +1,18 @@
 <?php
 
+//- Allow enter start amount of virtual coins to play with
+//- Allow to set BET amount per single spin
+//- Continuously play while there is enough coins
+//- Win amount should be sized based on step/size per BET. If base bet is 5 but I set 10 it should give me twice the win
+//per win condition.
+//If there are elements of 3 that each gives 5, and I bet twice (10) then it should be 3*5*2 = 30 as win amount.
+//- There should be option to change board size with few lines of code
+//- There should be option to define win conditions with few lines of code
+//
+//TASK SHOULD BE DONE IN SEPARATE REPOSITORY
+//CODE SHOULD BE FORMATTED
+//CODE SHOULD MATCH PSR STANDARTS
+
 require_once("helpers.php");
 require_once("userInput.php");
 
