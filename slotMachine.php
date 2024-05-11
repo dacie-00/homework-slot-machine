@@ -70,14 +70,10 @@ function createElement($symbol, $weight, $value) {
     return $element;
 }
 
-function createBoard($width, $height)
+function createBoard($width, $height, $elements)
 {
     $board = new stdClass();
-    $board->elements = [
-        createElement("/", 3, 1),
-        createElement("-", 1 , 2),
-        createElement("q", 1, 2)
-    ];
+    $board->elements = $elements;
     $board->content = [];
     $board->width = $width;
     $board->height = $height;
@@ -89,8 +85,10 @@ function displayBoard(stdClass $board)
 {
     foreach ($board->content as $y => $row) {
         foreach ($row as $x => $element) {
-            echo $element->symbol;
+            echo "|";
+            echo " $element->symbol ";
         }
+        echo "|";
         echo "\n";
     }
 }
@@ -101,9 +99,15 @@ function calculateMatchPayout($element, $condition, $ratio) {
 
 $properties = [
     "width" => 5,
-    "height" => 5,
+    "height" => 3,
     "winConditions" => [[[0, 0], [1, 0], [2, 0]], [[0, 0], [1, 0], [2, 0], [3, 0]]],
-    "baseBet" => 5
+    "baseBet" => 5,
+    "elements" => [
+        createElement("/", 7, 1),
+        createElement("$", 1 , 5),
+        createElement("q", 3, 2),
+        createElement("-", 4, 1)
+    ]
 ];
 
 $money = 1000;
@@ -130,7 +134,7 @@ while (true) {
     }
     $betRatio = $bet / $properties["baseBet"];
 
-    $board = createBoard($properties["width"], $properties["height"]);
+    $board = createBoard($properties["width"], $properties["height"], $properties["elements"]);
     fillBoard($board);
     displayBoard($board);
     $matches = findMatches($board, $properties["winConditions"]);
@@ -140,8 +144,9 @@ while (true) {
     foreach ($matches as $match) {
         $payout = calculateMatchPayout($match->element, $match->condition, $betRatio);
         $money += $payout;
-        echo "{$match->element->symbol}, ($match->x $match->y), matched!, $payout coins!\n";
+        echo "{$match->element->symbol}, ($match->x $match->y), matched! $payout coins!\n";
     }
+
     $moneyDelta = $money - $moneyBefore;
     $moneyDeltaDisplay = abs($moneyDelta);
     if ($moneyDelta > 0) {
