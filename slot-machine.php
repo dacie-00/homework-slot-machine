@@ -1,6 +1,6 @@
 <?php
 
-// TODO:
+require_once("helpers.php");
 
 $properties = [
     "width" => 4,
@@ -8,20 +8,6 @@ $properties = [
     "winConditions" => []
 ];
 
-
-$elements = [createElement("+", 3), createElement("-", 1), createElement("*", 1), ];
-function weightedRandom($elements) {
-    $total = array_sum(array_column($elements, "weight"));
-    $randomValue = rand(0, $total);
-    foreach ($elements as $element) {
-        echo "$randomValue - $element->weight\n";
-        if ($randomValue <= $element->weight) {
-            return $element;
-        }
-        $randomValue -= $element->weight;
-    }
-    throw new Exception("Weights not correctly defined!");
-}
 function fillBoard(stdClass $board) {
     for ($y = 0; $y < $board->height; $y++) {
         $board->content[$y] = [];
@@ -39,7 +25,7 @@ function createElement($symbol, $weight, $value) {
     return $element;
 }
 
-function createBoard()
+function createBoard($width, $height)
 {
     $board = new stdClass();
     $board->elements = [
@@ -48,8 +34,8 @@ function createBoard()
         createElement("*", 1, 1)
     ];
     $board->content = [];
-    $board->width = 30;
-    $board->height = 8;
+    $board->width = $width;
+    $board->height = $height;
     $board->winConditions = [];
     return $board;
 }
@@ -65,6 +51,6 @@ function displayBoard(stdClass $board)
 }
 
 
-$board = createBoard();
+$board = createBoard($properties["width"], $properties["height"]);
 fillBoard($board);
 displayBoard($board);
