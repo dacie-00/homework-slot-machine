@@ -16,7 +16,7 @@
 require_once("helpers.php");
 require_once("userInput.php");
 
-function checkMatch(stdClass $board, array $condition, $x, $y): bool
+function checkMatch(stdClass $board, array $condition, int $x, int $y): bool
 {
     $matchSymbol = $board->content[$y][$x]->symbol;
     foreach ($condition as $position) {
@@ -30,7 +30,7 @@ function checkMatch(stdClass $board, array $condition, $x, $y): bool
     return true;
 }
 
-function createMatch(stdClass $element, array $condition, int $x, int $y)
+function createMatch(stdClass $element, array $condition, int $x, int $y): stdClass
 {
     $match = new stdClass();
     $match->element = $element;
@@ -40,7 +40,7 @@ function createMatch(stdClass $element, array $condition, int $x, int $y)
     return $match;
 }
 
-function findMatches(stdClass $board, array $winConditions)
+function findMatches(stdClass $board, array $winConditions): array
 {
     $matches = [];
     foreach ($winConditions as $condition) {
@@ -55,7 +55,7 @@ function findMatches(stdClass $board, array $winConditions)
     return $matches;
 }
 
-function fillBoard(stdClass $board)
+function fillBoard(stdClass $board): void
 {
     for ($y = 0; $y < $board->height; $y++) {
         $board->content[$y] = [];
@@ -66,7 +66,7 @@ function fillBoard(stdClass $board)
 }
 
 
-function createElement($symbol, $weight, $value)
+function createElement(string $symbol, int $weight, int $value)
 {
     $element = new stdClass();
     $element->symbol = $symbol;
@@ -75,7 +75,7 @@ function createElement($symbol, $weight, $value)
     return $element;
 }
 
-function createBoard($width, $height, $elements)
+function createBoard(int $width, int $height, array $elements): stdClass
 {
     $board = new stdClass();
     $board->elements = $elements;
@@ -86,7 +86,7 @@ function createBoard($width, $height, $elements)
     return $board;
 }
 
-function displayBoard(stdClass $board)
+function displayBoard(stdClass $board): void
 {
     foreach ($board->content as $y => $row) {
         foreach ($row as $x => $element) {
@@ -98,7 +98,7 @@ function displayBoard(stdClass $board)
     }
 }
 
-function calculateMatchPayout($element, $condition, $ratio)
+function calculateMatchPayout(stdClass $element, array $condition, int $ratio)
 {
     return (int)$element->value * count($condition) * $ratio;
 }
