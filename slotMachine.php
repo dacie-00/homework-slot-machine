@@ -94,7 +94,7 @@ function displayBoard(stdClass $board)
 }
 
 function calculateMatchPayout($element, $condition, $ratio) {
-    return $element->value * count($condition) * $ratio;
+    return (int) $element->value * count($condition) * $ratio;
 }
 
 $properties = [
