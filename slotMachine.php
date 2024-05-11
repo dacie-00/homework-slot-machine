@@ -83,40 +83,68 @@ function displayBoard(stdClass $board)
 }
 
 function calculateMatchPayout($element, $condition, $basePayout, $ratio) {
-    return $element->value * count($condition) * $basePayout;
+    return $element->value * count($condition) * $basePayout * $ratio;
 }
 
 $properties = [
     "width" => 5,
     "height" => 5,
     "winConditions" => [[[0, 0], [1, 0], [2, 0]], [[0, 0], [1, 0], [2, 0], [3, 0]]],
-    "basePay" => 5
+    "baseBet" => 5
 ];
 
 $money = 1000;
-$bet = 100;
-$betRatio = $properties["basePay"] / 2;
 
-$board = createBoard($properties["width"], $properties["height"]);
-fillBoard($board);
-displayBoard($board);
-$matches = findMatches($board, $properties["winConditions"]);
+echo "Welcome!\n";
+echo "Enter the total amount of coins you wish to play with!\n";
+$money = getUserChoiceFromRange(1, 100000, null, "count");
+$bet = 5;
+$bet = min($bet, $money);
 
-$moneyBefore = $money;
-$money -= $bet;
-foreach ($matches as $match) {
-    $payout = calculateMatchPayout($match->element, $match->condition, $properties["basePay"], $betRatio);
-    $money += $payout;
-    echo "{$match->element->symbol}, ($match->x $match->y), matched!, $payout dollars!\n";
-}
-$moneyDelta = $money - $moneyBefore;
-$moneyDeltaDisplay = abs($moneyDelta);
-if ($moneyDelta > 0) {
-    echo "Congratulations! You made a profit of $moneyDeltaDisplay dollars!\n";
-}
-if ($moneyDelta < 0) {
-    echo "Oh no! You made a loss of $moneyDeltaDisplay dollars!\n";
-}
-if ($moneyDelta === 0) {
-    echo "You broke even!\n";
+while (true) {
+    echo "You have $money coins.\n";
+    while(true) {
+        echo "1) Play with a bet of $bet coins\n";
+        echo "2) Change bet amount\n";
+        $choice = getUserChoiceFromArray(["1", "2"], "choice");
+        switch ($choice) {
+            case 1:
+                break 2;
+            case 2:
+                $bet = getUserChoiceFromRange(1, $money, null, "bet amount");
+                break;
+        }
+    }
+    $betRatio = $bet / $properties["baseBet"];
+
+    $board = createBoard($properties["width"], $properties["height"]);
+    fillBoard($board);
+    displayBoard($board);
+    $matches = findMatches($board, $properties["winConditions"]);
+
+    $moneyBefore = $money;
+    $money -= $bet;
+    foreach ($matches as $match) {
+        $payout = calculateMatchPayout($match->element, $match->condition, $properties["baseBet"], $betRatio);
+        $money += $payout;
+        echo "{$match->element->symbol}, ($match->x $match->y), matched!, $payout coins!\n";
+    }
+    $moneyDelta = $money - $moneyBefore;
+    $moneyDeltaDisplay = abs($moneyDelta);
+    if ($moneyDelta > 0) {
+        echo "Congratulations! You made a profit of $moneyDeltaDisplay coins!\n";
+    }
+    if ($moneyDelta < 0) {
+        echo "Oh no! You made a loss of $moneyDeltaDisplay coins!\n";
+        if ($bet > $money) {
+            $bet = $money;
+        }
+    }
+    if ($moneyDelta === 0) {
+        echo "You broke even!\n";
+    }
+    if ($money <= 0) {
+        echo "You ran out of money! Oh well, thanks for playing!\n";
+        exit();
+    }
 }
