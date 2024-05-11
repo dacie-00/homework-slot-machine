@@ -95,8 +95,8 @@ function displayBoard(stdClass $board)
     }
 }
 
-function calculateMatchPayout($element, $condition, $basePayout, $ratio) {
-    return $element->value * count($condition) * $basePayout * $ratio;
+function calculateMatchPayout($element, $condition, $ratio) {
+    return $element->value * count($condition) * $ratio;
 }
 
 $properties = [
@@ -138,7 +138,7 @@ while (true) {
     $moneyBefore = $money;
     $money -= $bet;
     foreach ($matches as $match) {
-        $payout = calculateMatchPayout($match->element, $match->condition, $properties["baseBet"], $betRatio);
+        $payout = calculateMatchPayout($match->element, $match->condition, $betRatio);
         $money += $payout;
         echo "{$match->element->symbol}, ($match->x $match->y), matched!, $payout coins!\n";
     }
