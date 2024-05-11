@@ -1,6 +1,7 @@
 <?php
 
 require_once("helpers.php");
+require_once("userInput.php");
 
 function checkMatch(stdClass $board, array $condition, $x, $y): bool {
     $matchSymbol = $board->content[$y][$x]->symbol;
