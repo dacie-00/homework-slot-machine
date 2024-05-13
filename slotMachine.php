@@ -52,7 +52,6 @@ function markMatchedElements(stdClass $board, stdClass $match): void
     }
 }
 
-
 function createMatch(stdClass $element, stdClass $condition, int $x, int $y): stdClass
 {
     $match = new stdClass();
@@ -154,6 +153,7 @@ function calculateMatchPayout(stdClass $element, stdClass $condition, int $ratio
     return (int)$element->value * count($condition->positions) * $ratio;
 }
 
+
 $properties = [
     "width" => 5,
     "height" => 3,
@@ -170,8 +170,6 @@ $properties = [
         createElement("D", 4, 1)
     ]
 ];
-
-$coins = 1000;
 
 echo "Welcome!\n";
 echo "Enter the total amount of coins you wish to play with!\n";
