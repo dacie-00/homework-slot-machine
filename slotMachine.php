@@ -13,8 +13,23 @@
 //CODE SHOULD BE FORMATTED
 //CODE SHOULD MATCH PSR STANDARTS
 
-require_once("helpers.php");
 require_once("userInput.php");
+
+function weightedRandom(array $elements): stdClass
+{
+    $randomValue = mt_rand(1, (int)array_sum(array_column($elements, "weight")));
+
+    foreach ($elements as $element) {
+        if ($element->weight < 0) {
+            throw new InvalidArgumentException("Element weight cannot be negative");
+        }
+        $randomValue -= $element->weight;
+        if ($randomValue <= 0) {
+            return $element;
+        }
+    }
+    return $elements[0]; // Code should never get here, but in case it does we return the first element
+}
 
 function checkMatch(stdClass $board, stdClass $condition, int $x, int $y): bool
 {
@@ -30,7 +45,8 @@ function checkMatch(stdClass $board, stdClass $condition, int $x, int $y): bool
     return true;
 }
 
-function markMatchedElements($board, $match): void {
+function markMatchedElements(stdClass $board, stdClass $match): void
+{
     foreach ($match->condition->positions as $position) {
         $board->content[$match->y + $position[1]][$match->x + $position[0]]->isInMatch = true;
     }
@@ -81,8 +97,7 @@ function fillBoard(stdClass $board): void
     }
 }
 
-
-function createElement(string $symbol, int $weight, int $value)
+function createElement(string $symbol, int $weight, int $value): stdClass
 {
     $element = new stdClass();
     $element->symbol = $symbol;
@@ -92,7 +107,8 @@ function createElement(string $symbol, int $weight, int $value)
     return $element;
 }
 
-function createWinCondition(string $type, array $positions) {
+function createWinCondition(string $type, array $positions): stdClass
+{
     if ($type != strtolower("absolute") && $type != strtolower("relative")) {
         throw new Exception("Invalid win condition type - $type. Must be either absolute or relative");
     }
@@ -133,7 +149,7 @@ function displayBoard(stdClass $board): void
     echo $horizontalLine;
 }
 
-function calculateMatchPayout(stdClass $element, stdClass $condition, int $ratio)
+function calculateMatchPayout(stdClass $element, stdClass $condition, int $ratio): int
 {
     return (int)$element->value * count($condition->positions) * $ratio;
 }
@@ -155,16 +171,16 @@ $properties = [
     ]
 ];
 
-$money = 1000;
+$coins = 1000;
 
 echo "Welcome!\n";
 echo "Enter the total amount of coins you wish to play with!\n";
-$money = getUserChoiceFromRange(1, 100000, null, "count");
+$coins = getUserChoiceFromRange(1, 100000, null, "count");
 $bet = 5;
-$bet = min($bet, $money);
+$bet = min($bet, $coins);
 
 while (true) {
-    echo "You have $money coins.\n";
+    echo "You have $coins coins.\n";
     while (true) {
         echo "1) Play with a bet of $bet coins\n";
         echo "2) Change bet amount\n";
@@ -173,7 +189,7 @@ while (true) {
             case 1:
                 break 2;
             case 2:
-                $bet = getUserChoiceFromRange(1, $money, null, "bet amount");
+                $bet = getUserChoiceFromRange(1, $coins, null, "bet amount");
                 break;
         }
     }
@@ -183,30 +199,30 @@ while (true) {
     fillBoard($board);
     $matches = findMatches($board, $properties["winConditions"]);
 
-    $moneyBefore = $money;
-    $money -= $bet;
+    $coinsBeforeSpin = $coins;
+    $coins -= $bet;
     foreach ($matches as $match) {
         markMatchedElements($board, $match);
         $payout = calculateMatchPayout($match->element, $match->condition, $betRatio);
-        $money += $payout;
+        $coins += $payout;
     }
     displayBoard($board);
 
-    $moneyDelta = $money - $moneyBefore;
-    $moneyDeltaDisplay = abs($moneyDelta);
-    if ($moneyDelta > 0) {
-        echo "Congratulations! You made a profit of $moneyDeltaDisplay coins!\n";
+    $coinsDelta = $coins - $coinsBeforeSpin;
+    $coinsDeltaDisplay = abs($coinsDelta);
+    if ($coinsDelta > 0) {
+        echo "Congratulations! You made a profit of $coinsDeltaDisplay coins!\n";
     }
-    if ($moneyDelta < 0) {
-        echo "Oh no! You made a loss of $moneyDeltaDisplay coins!\n";
-        if ($bet > $money) {
-            $bet = $money;
+    if ($coinsDelta < 0) {
+        echo "Oh no! You made a loss of $coinsDeltaDisplay coins!\n";
+        if ($bet > $coins) {
+            $bet = $coins;
         }
     }
-    if ($moneyDelta === 0) {
+    if ($coinsDelta === 0) {
         echo "You broke even!\n";
     }
-    if ($money <= 0) {
+    if ($coins <= 0) {
         echo "You ran out of money! Oh well, thanks for playing!\n";
         exit();
     }
