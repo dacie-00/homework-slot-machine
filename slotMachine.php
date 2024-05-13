@@ -16,10 +16,10 @@
 require_once("helpers.php");
 require_once("userInput.php");
 
-function checkMatch(stdClass $board, array $condition, int $x, int $y): bool
+function checkMatch(stdClass $board, stdClass $condition, int $x, int $y): bool
 {
     $matchSymbol = $board->content[$y][$x]->symbol;
-    foreach ($condition as $position) {
+    foreach ($condition->positions as $position) {
         if (!isset($board->content[$y + $position[1]][$x + $position[0]]->symbol)) {
             return false;
         }
@@ -30,11 +30,18 @@ function checkMatch(stdClass $board, array $condition, int $x, int $y): bool
     return true;
 }
 
-function createMatch(stdClass $element, array $condition, int $x, int $y): stdClass
+function markMatchedElements($board, $match): void {
+    foreach ($match->condition->positions as $position) {
+        $board->content[$match->y + $position[1]][$match->x + $position[0]]->isInMatch = true;
+    }
+}
+
+
+function createMatch(stdClass $element, stdClass $condition, int $x, int $y): stdClass
 {
     $match = new stdClass();
     $match->element = $element;
-    $match->condition = $condition;
+    $match->condition = clone $condition;
     $match->x = $x;
     $match->y = $y;
     return $match;
@@ -43,8 +50,9 @@ function createMatch(stdClass $element, array $condition, int $x, int $y): stdCl
 function findMatches(stdClass $board, array $winConditions): array
 {
     $matches = [];
-    foreach ($winConditions as $type => $condition) {
-        if ($type === strtolower("relative")) {
+
+    foreach ($winConditions as $condition) {
+        if ($condition->type === strtolower("relative")) {
             foreach ($board->content as $y => $row) {
                 foreach ($row as $x => $element) {
                     if (checkMatch($board, $condition, $x, $y)) {
@@ -53,9 +61,9 @@ function findMatches(stdClass $board, array $winConditions): array
                 }
             }
         } else {
-            $x = $condition[0][0];
-            $y = $condition[0][1];
-            if (checkMatch($board, $condition, $x,$y)) {
+            $x = $condition->positions[0][0];
+            $y = $condition->positions[0][1];
+            if (checkMatch($board, $condition, $x, $y)) {
                 $matches[] = createMatch($board->content[$y][$x], $condition, $x, $y);
             }
         }
@@ -68,7 +76,7 @@ function fillBoard(stdClass $board): void
     for ($y = 0; $y < $board->height; $y++) {
         $board->content[$y] = [];
         for ($x = 0; $x < $board->width; $x++) {
-            $board->content[$y][$x] = weightedRandom($board->elements);
+            $board->content[$y][$x] = clone weightedRandom($board->elements);
         }
     }
 }
@@ -79,8 +87,19 @@ function createElement(string $symbol, int $weight, int $value)
     $element = new stdClass();
     $element->symbol = $symbol;
     $element->weight = $weight;
+    $element->isInMatch = false;
     $element->value = $value;
     return $element;
+}
+
+function createWinCondition(string $type, array $positions) {
+    if ($type != strtolower("absolute") && $type != strtolower("relative")) {
+        throw new Exception("Invalid win condition type - $type. Must be either absolute or relative");
+    }
+    $winCondition = new stdClass();
+    $winCondition->positions = $positions;
+    $winCondition->type = $type;
+    return $winCondition;
 }
 
 function createBoard(int $width, int $height, array $elements): stdClass
@@ -88,6 +107,7 @@ function createBoard(int $width, int $height, array $elements): stdClass
     $board = new stdClass();
     $board->elements = $elements;
     $board->content = [];
+    $board->matched = [];
     $board->width = $width;
     $board->height = $height;
     $board->winConditions = [];
@@ -96,31 +116,42 @@ function createBoard(int $width, int $height, array $elements): stdClass
 
 function displayBoard(stdClass $board): void
 {
+    $horizontalLine = str_repeat("+---", $board->width) . "+\n";
     foreach ($board->content as $y => $row) {
+        echo $horizontalLine;
         foreach ($row as $x => $element) {
             echo "|";
+            if ($element->isInMatch) {
+                echo "*$element->symbol*";
+                continue;
+            }
             echo " $element->symbol ";
         }
         echo "|";
         echo "\n";
     }
+    echo $horizontalLine;
 }
 
-function calculateMatchPayout(stdClass $element, array $condition, int $ratio)
+function calculateMatchPayout(stdClass $element, stdClass $condition, int $ratio)
 {
-    return (int)$element->value * count($condition) * $ratio;
+    return (int)$element->value * count($condition->positions) * $ratio;
 }
 
 $properties = [
     "width" => 5,
     "height" => 3,
-    "winConditions" => [[[0, 0], [1, 0], [2, 0]]],
+    "winConditions" => [
+        createWinCondition("relative", [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]]),
+        createWinCondition("relative", [[0, 0], [0, 1], [0, 2]]),
+        createWinCondition("absolute", [[0, 0], [1, 1], [2, 2], [3, 1], [4, 0]]),
+    ],
     "baseBet" => 5,
     "elements" => [
-        createElement("/", 7, 1),
-        createElement("$", 1, 5),
-        createElement("q", 3, 2),
-        createElement("-", 4, 1)
+        createElement("A", 7, 1),
+        createElement("B", 1, 5),
+        createElement("C", 3, 2),
+        createElement("D", 4, 1)
     ]
 ];
 
@@ -150,16 +181,16 @@ while (true) {
 
     $board = createBoard($properties["width"], $properties["height"], $properties["elements"]);
     fillBoard($board);
-    displayBoard($board);
     $matches = findMatches($board, $properties["winConditions"]);
 
     $moneyBefore = $money;
     $money -= $bet;
     foreach ($matches as $match) {
+        markMatchedElements($board, $match);
         $payout = calculateMatchPayout($match->element, $match->condition, $betRatio);
         $money += $payout;
-        echo "{$match->element->symbol}, ($match->x $match->y), matched! $payout coins!\n";
     }
+    displayBoard($board);
 
     $moneyDelta = $money - $moneyBefore;
     $moneyDeltaDisplay = abs($moneyDelta);
