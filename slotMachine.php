@@ -43,12 +43,20 @@ function createMatch(stdClass $element, array $condition, int $x, int $y): stdCl
 function findMatches(stdClass $board, array $winConditions): array
 {
     $matches = [];
-    foreach ($winConditions as $condition) {
-        foreach ($board->content as $y => $row) {
-            foreach ($row as $x => $element) {
-                if (checkMatch($board, $condition, $x, $y)) {
-                    $matches[] = createMatch($element, $condition, $x, $y);
+    foreach ($winConditions as $type => $condition) {
+        if ($type === strtolower("relative")) {
+            foreach ($board->content as $y => $row) {
+                foreach ($row as $x => $element) {
+                    if (checkMatch($board, $condition, $x, $y)) {
+                        $matches[] = createMatch($element, $condition, $x, $y);
+                    }
                 }
+            }
+        } else {
+            $x = $condition[0][0];
+            $y = $condition[0][1];
+            if (checkMatch($board, $condition, $x,$y)) {
+                $matches[] = createMatch($board->content[$y][$x], $condition, $x, $y);
             }
         }
     }
@@ -106,7 +114,7 @@ function calculateMatchPayout(stdClass $element, array $condition, int $ratio)
 $properties = [
     "width" => 5,
     "height" => 3,
-    "winConditions" => [[[0, 0], [1, 0], [2, 0]], [[0, 0], [1, 0], [2, 0], [3, 0]]],
+    "winConditions" => [[[0, 0], [1, 0], [2, 0]]],
     "baseBet" => 5,
     "elements" => [
         createElement("/", 7, 1),
