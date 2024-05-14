@@ -15,38 +15,6 @@
 
 include ("config.php");
 
-function getUserChoiceFromArray(array $choices, string $promptMessage = "input")
-{
-    while (true) {
-        $choice = readline(ucfirst("$promptMessage - "));
-        if (!in_array($choice, $choices, true)) {
-            echo "Invalid $promptMessage!\n";
-            continue;
-        }
-        return $choice;
-    }
-}
-
-function getUserChoiceFromRange(int $min, int $max, string $cancel = null, string $promptNoun = "input"): int
-{
-    while (true) {
-        $choice = readline(ucfirst("$promptNoun - "));
-        if ($choice === $cancel) {
-            return $choice;
-        }
-        if (!is_numeric($choice)) {
-            echo "Invalid $promptNoun!\n";
-            continue;
-        }
-        $choice = (int)$choice;
-        if ($choice < $min || $choice > $max) {
-            echo "Invalid $promptNoun!\n";
-            continue;
-        }
-        return $choice;
-    }
-}
-
 function weightedRandom(array $elements): stdClass
 {
     $randomValue = mt_rand(1, (int)array_sum(array_column($elements, "weight")));
@@ -221,9 +189,52 @@ function calculateMatchPayout(stdClass $element, stdClass $condition, int $ratio
     return (int)$element->value * count($condition->positions) * $ratio;
 }
 
+function promptStartingCoins() {
+    echo "Enter the total amount of coins you wish to play with!\n";
+    while (true) {
+        $coins = readline("Amount - ");
+        if (!is_numeric($coins)) {
+            echo "Coin amount must be a numeric value!\n";
+            continue;
+        }
+        $coins = (int)$coins;
+        if ($coins <= 0) {
+            echo "Coin amount must be greater than 0!\n";
+            continue;
+        }
+        if ($coins >= 1000000) {
+            echo "Coin amount must be less than 1 000 000!\n";
+            continue;
+        }
+        break;
+    }
+    return $coins;
+}
+
+function promptBetAmount($coins)
+{
+    echo "Enter your bet amount\n";
+    while (true) {
+        $bet = readline("Amount - ");
+        if (!is_numeric($bet)) {
+            echo "Bet amount must be a numeric value!\n";
+            continue;
+        }
+        $bet = (int)$bet;
+        if ($bet <= 0) {
+            echo "Bet amount must be greater than 0!\n";
+            continue;
+        }
+        if ($bet > $coins) {
+            echo "Bet amount must be less than your coin count!\n";
+            continue;
+        }
+        return $bet;
+    }
+}
+
 echo "Welcome!\n";
-echo "Enter the total amount of coins you wish to play with!\n";
-$coins = getUserChoiceFromRange(1, 100000, null, "count");
+$coins = promptStartingCoins();
 $bet = 5;
 $bet = min($bet, $coins);
 
@@ -232,13 +243,15 @@ while (true) {
     while (true) {
         echo "1) Play with a bet of $bet coins\n";
         echo "2) Change bet amount\n";
-        $choice = getUserChoiceFromArray(["1", "2"], "choice");
+        $choice = readline("Choice: ");
         switch ($choice) {
             case 1:
                 break 2;
             case 2:
-                $bet = getUserChoiceFromRange(1, $coins, null, "bet amount");
+                $bet = promptBetAmount($coins);
                 break;
+            default:
+                echo "Invalid choice!";
         }
     }
     $betRatio = $bet / $properties["baseBet"];
