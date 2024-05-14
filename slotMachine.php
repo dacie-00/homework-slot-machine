@@ -243,12 +243,17 @@ while (true) {
     while (true) {
         echo "1) Play with a bet of $bet coins\n";
         echo "2) Change bet amount\n";
+        echo "3) Exit\n";
         $choice = readline("Choice: ");
         switch ($choice) {
             case 1:
                 break 2;
             case 2:
                 $bet = promptBetAmount($coins);
+                break;
+            case 3:
+                echo "Thanks for playing!\n";
+                exit;
                 break;
             default:
                 echo "Invalid choice!";
