@@ -235,7 +235,7 @@ function promptBetAmount($coins)
 
 echo "Welcome!\n";
 $coins = promptStartingCoins();
-$bet = 5;
+$bet = $properties["baseBet"];
 $bet = min($bet, $coins);
 
 while (true) {
@@ -254,14 +254,14 @@ while (true) {
                 echo "Invalid choice!";
         }
     }
-    $betRatio = $bet / $properties["baseBet"];
-
     $board = createBoard($properties["width"], $properties["height"], $properties["elements"]);
     fillBoard($board);
     $matches = findMatches($board, $properties["winConditions"]);
 
     $coinsBeforeSpin = $coins;
     $coins -= $bet;
+
+    $betRatio = $bet / $properties["baseBet"];
     foreach ($matches as $match) {
         markMatchedElements($board, $match);
         $payout = calculateMatchPayout($match->element, $match->condition, $betRatio);
