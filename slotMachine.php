@@ -13,6 +13,8 @@
 //CODE SHOULD BE FORMATTED
 //CODE SHOULD MATCH PSR STANDARTS
 
+include ("config.php");
+
 function getUserChoiceFromArray(array $choices, string $promptMessage = "input")
 {
     while (true) {
@@ -182,24 +184,6 @@ function calculateMatchPayout(stdClass $element, stdClass $condition, int $ratio
 {
     return (int)$element->value * count($condition->positions) * $ratio;
 }
-
-
-$properties = [
-    "width" => 5,
-    "height" => 3,
-    "winConditions" => [
-        createWinCondition("relative", [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]]),
-        createWinCondition("relative", [[0, 0], [0, 1], [0, 2]]),
-        createWinCondition("absolute", [[0, 0], [1, 1], [2, 2], [3, 1], [4, 0]]),
-    ],
-    "baseBet" => 5,
-    "elements" => [
-        createElement("A", 7, 1),
-        createElement("B", 1, 5),
-        createElement("C", 3, 2),
-        createElement("D", 4, 1)
-    ]
-];
 
 echo "Welcome!\n";
 echo "Enter the total amount of coins you wish to play with!\n";
