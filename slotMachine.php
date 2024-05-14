@@ -63,10 +63,13 @@ function weightedRandom(array $elements): stdClass
     return $elements[0]; // Code should never get here, but in case it does we return the first element
 }
 
-function checkMatch(stdClass $board, stdClass $condition, int $x, int $y): bool
+function checkMatchRelative(stdClass $board, stdClass $condition, int $x, int $y): bool
 {
     $matchSymbol = $board->content[$y][$x]->symbol;
-    foreach ($condition->positions as $position) {
+    foreach ($condition->positions as $index => $position) {
+        if ($index === 0) {
+            continue; // First one is skipped because we don't need to check it against itself
+        }
         if (!isset($board->content[$y + $position[1]][$x + $position[0]]->symbol)) {
             return false;
         }
@@ -77,18 +80,43 @@ function checkMatch(stdClass $board, stdClass $condition, int $x, int $y): bool
     return true;
 }
 
+
+function checkMatchAbsolute(stdClass $board, stdClass $condition): bool
+{
+    $matchSymbol = $board->content[$condition->positions[0][1]][$condition->positions[0][0]]->symbol;
+    foreach ($condition->positions as $index => $position) {
+        if ($index === 0) {
+            continue; // First one is skipped because we don't need to check it against itself
+        }
+        if (!isset($board->content[$position[1]][$position[0]]->symbol)) {
+            return false;
+        }
+        if ($matchSymbol != $board->content[$position[1]][$position[0]]->symbol) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function markMatchedElements(stdClass $board, stdClass $match): void
 {
+    if ($match->type === strtolower("relative")) {
+        foreach ($match->condition->positions as $position) {
+            $board->content[$match->y + $position[1]][$match->x + $position[0]]->isInMatch = true;
+        }
+        return;
+    }
     foreach ($match->condition->positions as $position) {
-        $board->content[$match->y + $position[1]][$match->x + $position[0]]->isInMatch = true;
+        $board->content[$position[1]][$position[0]]->isInMatch = true;
     }
 }
 
-function createMatch(stdClass $element, stdClass $condition, int $x, int $y): stdClass
+function createMatch(stdClass $element, stdClass $condition, string $type, int $x = null, int $y = null): stdClass
 {
     $match = new stdClass();
     $match->element = $element;
     $match->condition = clone $condition;
+    $match->type = $type;
     $match->x = $x;
     $match->y = $y;
     return $match;
@@ -102,16 +130,16 @@ function findMatches(stdClass $board, array $winConditions): array
         if ($condition->type === strtolower("relative")) {
             foreach ($board->content as $y => $row) {
                 foreach ($row as $x => $element) {
-                    if (checkMatch($board, $condition, $x, $y)) {
-                        $matches[] = createMatch($element, $condition, $x, $y);
+                    if (checkMatchRelative($board, $condition, $x, $y)) {
+                        $matches[] = createMatch($element, $condition, "relative", $x, $y);
                     }
                 }
             }
         } else {
             $x = $condition->positions[0][0];
             $y = $condition->positions[0][1];
-            if (checkMatch($board, $condition, $x, $y)) {
-                $matches[] = createMatch($board->content[$y][$x], $condition, $x, $y);
+            if (checkMatchAbsolute($board, $condition)) {
+                $matches[] = createMatch($board->content[$y][$x], $condition, "absolute", $x, $y);
             }
         }
     }
@@ -146,6 +174,14 @@ function createWinCondition(string $type, array $positions): stdClass
     $winCondition = new stdClass();
     $winCondition->positions = $positions;
     $winCondition->type = $type;
+    if ($winCondition->type === strtolower("relative")) { // force relative condition to start at 0, 0
+        $baseX = $winCondition->positions[0][0];
+        $baseY = $winCondition->positions[0][1];
+        foreach ($winCondition->positions as &$position) {
+            $position[0] -= $baseX;
+            $position[1] -= $baseY;
+        }
+    }
     return $winCondition;
 }
 
