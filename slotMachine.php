@@ -270,7 +270,7 @@ while (true) {
     $coinsDelta = $coins - $coinsBeforeSpin;
     $coinsDeltaDisplay = abs($coinsDelta);
     if ($coinsDelta > 0) {
-        echo "Congratulations! You made a profit of $coinsDeltaDisplay coins!\n";
+        echo "Nice! You made a profit of $coinsDeltaDisplay coins!\n";
     }
     if ($coinsDelta < 0) {
         echo "Oh no! You made a loss of $coinsDeltaDisplay coins!\n";
