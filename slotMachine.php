@@ -15,8 +15,9 @@
 
 include("config.php");
 
-function weightedRandom(array $elements): stdClass
+function getRandomElement(array $elements): stdClass
 {
+    // weighted random
     $randomValue = mt_rand(1, (int)array_sum(array_column($elements, "weight")));
 
     foreach ($elements as $element) {
@@ -119,7 +120,7 @@ function fillBoard(stdClass $board): void
     for ($y = 0; $y < $board->height; $y++) {
         $board->content[$y] = [];
         for ($x = 0; $x < $board->width; $x++) {
-            $board->content[$y][$x] = clone weightedRandom($board->elements);
+            $board->content[$y][$x] = clone getRandomElement($board->elements);
         }
     }
 }
