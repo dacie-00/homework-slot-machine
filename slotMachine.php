@@ -254,7 +254,6 @@ while (true) {
             case 3:
                 echo "Thanks for playing!\n";
                 exit;
-                break;
             default:
                 echo "Invalid choice!";
         }
