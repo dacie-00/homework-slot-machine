@@ -13,7 +13,7 @@
 //CODE SHOULD BE FORMATTED
 //CODE SHOULD MATCH PSR STANDARTS
 
-include ("config.php");
+include("config.php");
 
 function weightedRandom(array $elements): stdClass
 {
@@ -187,7 +187,8 @@ function calculateMatchPayout(stdClass $element, stdClass $condition, int $ratio
     return (int)$element->value * count($condition->positions) * $ratio;
 }
 
-function promptStartingCoins() {
+function promptStartingCoins()
+{
     echo "Enter the total amount of coins you wish to play with!\n";
     while (true) {
         $coins = readline("Amount - ");
