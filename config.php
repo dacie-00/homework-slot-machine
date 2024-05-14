@@ -14,7 +14,7 @@ $properties = [
     "elements" => [
         createElement("A", 7, 1),
         createElement("B", 1, 5),
-        createElement("C", 3,2),
+        createElement("C", 3, 2),
         createElement("D", 4, 1)
     ]
 ];
