@@ -167,11 +167,11 @@ function createBoard(int $width, int $height, array $elements): stdClass
 
 function displayBoard(stdClass $board): void
 {
-    $matchSymbols = [" ", "*", "&"];
+    $matchSymbols = [" ", "*", "&"]; // & gets drawn when two matches are overlapping
     $horizontalLine = str_repeat("+---", $board->width) . "+\n";
-    foreach ($board->content as $y => $row) {
+    foreach ($board->content as $row) {
         echo $horizontalLine;
-        foreach ($row as $x => $element) {
+        foreach ($row as $element) {
             echo "|";
             $matchSymbol = $matchSymbols[min($element->matchCount, 2)];
             echo $matchSymbol . $element->symbol . $matchSymbol;
