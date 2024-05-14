@@ -70,12 +70,12 @@ function markMatchedElements(stdClass $board, stdClass $match): void
 {
     if ($match->type === strtolower("relative")) {
         foreach ($match->condition->positions as $position) {
-            $board->content[$match->y + $position[1]][$match->x + $position[0]]->isInMatch = true;
+            $board->content[$match->y + $position[1]][$match->x + $position[0]]->matchCount += 1;
         }
         return;
     }
     foreach ($match->condition->positions as $position) {
-        $board->content[$position[1]][$position[0]]->isInMatch = true;
+        $board->content[$position[1]][$position[0]]->matchCount += 1;
     }
 }
 
@@ -129,7 +129,7 @@ function createElement(string $symbol, int $weight, int $value): stdClass
     $element = new stdClass();
     $element->symbol = $symbol;
     $element->weight = $weight;
-    $element->isInMatch = false;
+    $element->matchCount = 0;
     $element->value = $value;
     return $element;
 }
@@ -167,16 +167,14 @@ function createBoard(int $width, int $height, array $elements): stdClass
 
 function displayBoard(stdClass $board): void
 {
+    $matchSymbols = [" ", "*", "&"];
     $horizontalLine = str_repeat("+---", $board->width) . "+\n";
     foreach ($board->content as $y => $row) {
         echo $horizontalLine;
         foreach ($row as $x => $element) {
             echo "|";
-            if ($element->isInMatch) {
-                echo "*$element->symbol*";
-                continue;
-            }
-            echo " $element->symbol ";
+            $matchSymbol = $matchSymbols[min($element->matchCount, 2)];
+            echo $matchSymbol . $element->symbol . $matchSymbol;
         }
         echo "|";
         echo "\n";
