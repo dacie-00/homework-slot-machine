@@ -284,6 +284,6 @@ while (true) {
     }
     if ($coins <= 0) {
         echo "You ran out of money! Oh well, thanks for playing!\n";
-        exit();
+        exit(); // break could be used here but exit is more explicit
     }
 }
